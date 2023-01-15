@@ -1,0 +1,72 @@
+#include <DS1302.h>//add zip library
+DS1302 rtc(13, 12, 11); //(RST, DAT, CLK)//use DS1302 RTC module
+
+void setup() {
+  Serial.begin(9600);
+  analogWrite (9, 255); // VCC (5V)(pin9)
+  analogWrite (10, 0);  // GND(pin10)
+  pinMode(5,OUTPUT);
+  pinMode(4,OUTPUT);
+  //digitalWrite(LOW)=>activate
+  //digitalWrite(HIGH)=>deactivate
+  digitalWrite(5,HIGH);//connect to light relay
+  digitalWrite(4,HIGH);//connect to motor relay
+////////////////////////////////////////////
+  //this code below is for setting your time
+  //after uploading once delete or deactivate this code below and upload again
+  rtc.writeProtect(false); //
+  rtc.setDOW(WEDNESDAY); //Day Of Week(=DOW)
+  rtc.setTime(13, 2, 30); //(hour, min, sec)
+  rtc.setDate(12, 21, 2022); //(day, month, year)
+  //write the current time
+/////////////////////////////////////////////////
+//digitalWrite(LOW)=>activate
+//digitalWrite(HIGH)=>deactivate
+}
+
+int Hour=0, Minuate=0, Sec=0;
+
+void loop() {
+
+  String data = rtc.getDateStr();     //dd.mm.yyyy
+  String dd = data.substring(0, 2);   //dd
+  String mm = data.substring(2, 6);   //.mm.  
+  String yyyy = data.substring(6, 10);//yyyy 
+  String data2 = rtc.getTimeStr();
+  String hour = data2.substring(0, 2);//yyyy
+  String minuate = data2.substring(3, 5);
+  String sec =data2.substring(6,8);
+  Hour=hour.toInt();
+  Minuate=minuate.toInt();
+  Sec=sec.toInt();
+  /////////////////////////////get time
+  if(Hour>=7 && Hour<19){//when you will turn on the light
+    digitalWrite(5,LOW);//turn on light
+    Serial.println("light on");
+  }
+  if(Hour>=19){//when you will turn off the light
+    digitalWrite(5,HIGH);//turn off light
+    Serial.println("light off");
+  }
+  if(Hour==12 && Minuate==0 && Sec==00){//when you will water the plants
+    digitalWrite(4,LOW);//water plants
+    delay(7000);//how long water pump should work
+    digitalWrite(4,HIGH);
+  }
+  //////////////////////////print current time
+  
+  Serial.print(yyyy);
+  Serial.print(mm); 
+  Serial.print(dd); Serial.print(" ");
+  Serial.print(rtc.getDOWStr());
+  Serial.print("/");
+  Serial.print(Hour);
+  Serial.print("/");
+  Serial.print(Minuate);
+  Serial.print("/");
+  Serial.print(Sec);
+  Serial.println("/");
+  Serial.println(rtc.getTimeStr());
+  delay(1000);
+  
+}
